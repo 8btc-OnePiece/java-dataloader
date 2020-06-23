@@ -30,6 +30,8 @@ Thumbs.db
 *.swp
 
 # Gradle Files
+gradlew
+gradlew.bat
 .gradle
 
 # Build output directies
@@ -39,6 +41,7 @@ Thumbs.db
 **/build
 /node_modules
 **/node_modules
+/gradle
 
 # IntelliJ specific files/directories
 out
