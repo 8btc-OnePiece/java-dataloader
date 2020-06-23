@@ -247,7 +247,7 @@ public class DataLoader<K, V> {
      */
     @SuppressWarnings("unchecked")
     public static <K, V> DataLoader<K, V> newMappedDataLoaderWithTry(MappedBatchLoader<K, Try<V>> batchLoadFunction, DataLoaderOptions options) {
-        return new DataLoader<>(batchLoadFunction, options);
+        return new DataLoader<K, V>(batchLoadFunction, options);
     }
 
     /**
@@ -329,6 +329,14 @@ public class DataLoader<K, V> {
      * @param options           the batch load options
      */
     public DataLoader(BatchLoader<K, V> batchLoadFunction, DataLoaderOptions options) {
+        this((Object) batchLoadFunction, options);
+    }
+
+    public DataLoader (MappedBatchLoader<K, V> batchLoadFunction) {
+        this((Object) batchLoadFunction, null);
+    }
+
+    public DataLoader (MappedBatchLoader<K, V> batchLoadFunction, DataLoaderOptions options) {
         this((Object) batchLoadFunction, options);
     }
 
