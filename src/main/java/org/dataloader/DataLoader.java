@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.dataloader.impl.Assertions.nonNull;
 
@@ -367,6 +369,42 @@ public class DataLoader<K, V> {
     public CompletableFuture<V> load(K key) {
         return load(key, null);
     }
+
+    /**
+     * a simple method to load sync and return the value.
+     * @param key
+     * @return
+     */
+    public V loadAndJoin(K key) {
+        CompletableFuture<V> future = load(key);
+        dispatch();
+        return future.join();
+    }
+
+    /**
+     * load by a support function
+     * @param key the key to load
+     * @param fun a function handle the value
+     * @param <R> fun's return type
+     * @return the future of the fun's return, return null when value is null.
+     */
+    public <R> CompletableFuture<R> loadBy(K key, Function<V, R> fun) {
+        return loadBy(key, fun, () -> null);
+    }
+
+    /**
+     * load by a support function and a supplier when value is null
+     * @param key the key to load
+     * @param fun a function handle the value
+     * @param or a function handle null
+     * @param <R> fun's return type
+     * @return the future of the fun's return
+     */
+    public <R> CompletableFuture<R> loadBy(K key, Function<V, R> fun, Supplier<R> or) {
+        return load(key).thenApply(v -> v == null ? or.get() : fun.apply(v));
+    }
+
+
 
     /**
      * This will return an optional promise to a value previously loaded via a {@link #load(Object)} call or empty if not call has been made for that key.
