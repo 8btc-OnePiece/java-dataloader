@@ -401,10 +401,16 @@ public class DataLoader<K, V> {
      * @return the future of the fun's return
      */
     public <R> CompletableFuture<R> loadBy(K key, Function<V, R> fun, Supplier<R> or) {
-        return load(key).thenApply(v -> v == null ? or.get() : fun.apply(v));
+        return load(key).thenApply(v -> {
+            if (v != null) {
+                R r = fun.apply(v);
+                if (r != null) {
+                    return r;
+                }
+            }
+            return or.get();
+        });
     }
-
-
 
     /**
      * This will return an optional promise to a value previously loaded via a {@link #load(Object)} call or empty if not call has been made for that key.
