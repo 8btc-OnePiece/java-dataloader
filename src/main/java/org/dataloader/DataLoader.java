@@ -381,17 +381,11 @@ public class DataLoader<K, V> {
         return future.join();
     }
 
-    /**
-     * a simple method to load sync and return the values.
-     * @param keys
-     * @return
-     */
-    public List<V> loadManyAndJoin(List<K> keys) {
-        CompletableFuture<List<V>> future = loadMany(keys);
+    public <R> R loadAndJoinBy(K key, Function<V, R> fun) {
+        CompletableFuture<R> future = loadBy(key, fun);
         dispatch();
         return future.join();
     }
-
 
     /**
      * load by a support function
@@ -491,6 +485,40 @@ public class DataLoader<K, V> {
      */
     public CompletableFuture<List<V>> loadMany(List<K> keys) {
         return loadMany(keys, Collections.emptyList());
+    }
+
+    /**
+     * a simple method to load sync and return the values.
+     *
+     * @param keys
+     * @return
+     */
+    public List<V> loadManyAndJoin(List<K> keys) {
+        CompletableFuture<List<V>> future = loadMany(keys);
+        dispatch();
+        return future.join();
+    }
+
+    public <R> List<R> loadManyAndJoinBy(List<K> keys, Function<List<V>, List<R>> fun) {
+        CompletableFuture<List<R>> future = loadManyBy(keys, fun);
+        dispatch();
+        return future.join();
+    }
+
+    public <R> CompletableFuture<List<R>> loadManyBy(List<K> keys, Function<List<V>, List<R>> fun) {
+        return loadManyBy(keys, fun, () -> Collections.emptyList());
+    }
+
+    public <R> CompletableFuture<List<R>> loadManyBy(List<K> keys, Function<List<V>, List<R>> fun, Supplier<List<R>> or) {
+        return loadMany(keys).thenApply(listV -> {
+            if (listV != null) {
+                List<R> listR = fun.apply(listV);
+                if (listR != null) {
+                    return listR;
+                }
+            }
+            return or.get();
+        });
     }
 
     /**
