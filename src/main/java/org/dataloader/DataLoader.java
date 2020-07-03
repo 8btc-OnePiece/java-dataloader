@@ -382,6 +382,18 @@ public class DataLoader<K, V> {
     }
 
     /**
+     * a simple method to load sync and return the values.
+     * @param keys
+     * @return
+     */
+    public List<V> loadManyAndJoin(List<K> keys) {
+        CompletableFuture<List<V>> future = loadMany(keys);
+        dispatch();
+        return future.join();
+    }
+
+
+    /**
      * load by a support function
      * @param key the key to load
      * @param fun a function handle the value
