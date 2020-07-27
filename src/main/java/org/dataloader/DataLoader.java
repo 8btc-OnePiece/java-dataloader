@@ -382,7 +382,11 @@ public class DataLoader<K, V> {
     }
 
     public <R> R loadAndJoinBy(K key, Function<V, R> fun) {
-        CompletableFuture<R> future = loadBy(key, fun);
+        return loadAndJoinBy(key, fun, () -> null);
+    }
+
+    public <R> R loadAndJoinBy(K key, Function<V, R> fun, Supplier<R> or) {
+        CompletableFuture<R> future = loadBy(key, fun, or);
         dispatch();
         return future.join();
     }
@@ -500,7 +504,11 @@ public class DataLoader<K, V> {
     }
 
     public <R> List<R> loadManyAndJoinBy(List<K> keys, Function<List<V>, List<R>> fun) {
-        CompletableFuture<List<R>> future = loadManyBy(keys, fun);
+        return loadManyAndJoinBy(keys, fun, () -> Collections.emptyList());
+    }
+
+    public <R> List<R> loadManyAndJoinBy(List<K> keys, Function<List<V>, List<R>> fun, Supplier<List<R>> or) {
+        CompletableFuture<List<R>> future = loadManyBy(keys, fun, or);
         dispatch();
         return future.join();
     }
